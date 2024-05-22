@@ -1,6 +1,5 @@
 package main
 
-//go build -ldflags="-s -w"
 import (
 	"encoding/base64"
 	"encoding/json"
@@ -18,8 +17,8 @@ import (
 )
 
 var (
-	hostname, LLM /*systemPrompt,*/, keepAlive string
-	cxtLen                                     int
+	hostname, LLM, systemPrompt, keepAlive string
+	cxtLen                                 int
 )
 
 func request(url string, timeout int, header map[string]string, body []byte, Type string) ([]byte, int, error) {
@@ -218,10 +217,12 @@ func createPrompt(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"role":    "user",
 			"content": fmt.Sprintf("%s: %s", nickname[m.Author.ID], message),
 		})
-		/*messages = append(messages, map[string]string{
-			"role":    "system",
-			"content": systemPrompt,
-		})*/
+		if len(systemPrompt) > 0 {
+			messages = append(messages, map[string]string{
+				"role":    "system",
+				"content": systemPrompt,
+			})
+		}
 		for i := len(messages) - 1; i >= 0; i-- {
 			size += len(messages[i]["content"])
 			if size > cxtLen {
@@ -269,7 +270,7 @@ func createPrompt(s *discordgo.Session, m *discordgo.MessageCreate) {
 func createCommand(s *discordgo.Session) (err error) {
 	commandList, err := s.ApplicationCommands(s.State.User.ID, "")
 	if err != nil {
-		return fmt.Errorf("s.ApplicationCommands() error: %v",err)
+		return fmt.Errorf("s.ApplicationCommands() error: %v", err)
 	}
 	commands := make(map[string]*discordgo.ApplicationCommand)
 	for _, v := range commandList {
@@ -293,7 +294,7 @@ func createCommand(s *discordgo.Session) (err error) {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("s.ApplicationCommandCreate() error: %v",err)
+			return fmt.Errorf("s.ApplicationCommandCreate() error: %v", err)
 		}
 	}
 	if commands["list"] == nil {
@@ -305,7 +306,7 @@ func createCommand(s *discordgo.Session) (err error) {
 			Version:       version,
 		})
 		if err != nil {
-			return fmt.Errorf("s.ApplicationCommandCreate() error: %v",err)
+			return fmt.Errorf("s.ApplicationCommandCreate() error: %v", err)
 		}
 	}
 	if commands["current"] == nil {
@@ -317,7 +318,7 @@ func createCommand(s *discordgo.Session) (err error) {
 			Version:       version,
 		})
 		if err != nil {
-			return fmt.Errorf("s.ApplicationCommandCreate() error: %v",err)
+			return fmt.Errorf("s.ApplicationCommandCreate() error: %v", err)
 		}
 	}
 	if commands["delete"] == nil {
@@ -343,7 +344,7 @@ func createCommand(s *discordgo.Session) (err error) {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("s.ApplicationCommandCreate() error: %v",err)
+			return fmt.Errorf("s.ApplicationCommandCreate() error: %v", err)
 		}
 	}
 	if commands["manipulate"] == nil {
@@ -363,7 +364,7 @@ func createCommand(s *discordgo.Session) (err error) {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("s.ApplicationCommandCreate() error: %v",err)
+			return fmt.Errorf("s.ApplicationCommandCreate() error: %v", err)
 		}
 	}
 	if commands["timeout"] == nil {
@@ -383,7 +384,7 @@ func createCommand(s *discordgo.Session) (err error) {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("s.ApplicationCommandCreate() error: %v",err)
+			return fmt.Errorf("s.ApplicationCommandCreate() error: %v", err)
 		}
 	}
 	return
@@ -559,15 +560,15 @@ func commands(s *discordgo.Session, i *discordgo.InteractionCreate) {
 func onlineService(token string) (err error) {
 	bot, err := discordgo.New("Bot " + token)
 	if err != nil {
-		return fmt.Errorf("discordgo.New() error: %v",err)
+		return fmt.Errorf("discordgo.New() error: %v", err)
 	}
 	err = bot.Open()
 	if err != nil {
-		return fmt.Errorf("bot.Open() error: %v",err)
+		return fmt.Errorf("bot.Open() error: %v", err)
 	}
 	err = createCommand(bot)
 	if err != nil {
-		return fmt.Errorf("createCommand() error: %v",err)
+		return fmt.Errorf("createCommand() error: %v", err)
 	}
 	bot.AddHandler(createPrompt)
 	bot.AddHandler(commands)
@@ -613,14 +614,15 @@ func main() {
 	}
 	LLM = os.Getenv("MODEL")
 	if LLM == "" {
-		LLM = "phi3"
+		fmt.Println("LLM not set")
+		return
 	}
 	botToken := os.Getenv("TOKEN")
 	if botToken == "" {
 		fmt.Println("Discord Token not set")
 		return
 	}
-	//systemPrompt = os.Getenv("PROMPT")
+	systemPrompt = os.Getenv("SYSPROMPT")
 	keepAlive = os.Getenv("KEEPLOADED")
 	if keepAlive == "" {
 		keepAlive = "5m"
@@ -628,7 +630,7 @@ func main() {
 	cxtLen = 25000
 	err := onlineService(botToken)
 	if err != nil {
-		fmt.Printf("onlineService() error: %v\n",err)
+		fmt.Printf("onlineService() error: %v\n", err)
 		return
 	}
 }
