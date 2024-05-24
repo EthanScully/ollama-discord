@@ -18,7 +18,6 @@ import (
 
 var (
 	hostname, LLM, systemPrompt, keepAlive string
-	cxtLen                                 int
 )
 
 func request(url string, timeout int, header map[string]string, body []byte, Type string) ([]byte, int, error) {
@@ -143,10 +142,6 @@ func createPrompt(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 		message := strings.ReplaceAll(m.Content, fmt.Sprintf("<@%s>", s.State.User.ID), "")
-		size = +len(message)
-		if size > cxtLen {
-			message = message[size-cxtLen:]
-		}
 		if len(images) != 0 {
 			send = sendGenerate
 			data = map[string]any{
@@ -222,13 +217,6 @@ func createPrompt(s *discordgo.Session, m *discordgo.MessageCreate) {
 				"role":    "system",
 				"content": systemPrompt,
 			})
-		}
-		for i := len(messages) - 1; i >= 0; i-- {
-			size += len(messages[i]["content"])
-			if size > cxtLen {
-				messages = messages[i+1:]
-				break
-			}
 		}
 		send = sendChat
 		data = map[string]any{
@@ -627,7 +615,6 @@ func main() {
 	if keepAlive == "" {
 		keepAlive = "5m"
 	}
-	cxtLen = 25000
 	err := onlineService(botToken)
 	if err != nil {
 		fmt.Printf("onlineService() error: %v\n", err)
