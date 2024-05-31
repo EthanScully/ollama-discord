@@ -58,7 +58,7 @@ func sendChat(url string, data map[string]any) (chatResponse string, err error) 
 		err = fmt.Errorf("json make error:%v", err)
 		return
 	}
-	responseJson, code, err := request(url, 60, header, dataJson, "POST")
+	responseJson, code, err := request(url, 300, header, dataJson, "POST")
 	if err != nil {
 		return
 	} else if code != 200 {
@@ -84,7 +84,7 @@ func sendGenerate(url string, data map[string]any) (chatResponse string, err err
 		err = fmt.Errorf("json parsing error:%v", err)
 		return
 	}
-	responseJson, code, err := request(url, 60, header, dataJson, "POST")
+	responseJson, code, err := request(url, 300, header, dataJson, "POST")
 	if err != nil {
 		return
 	} else if code != 200 {
