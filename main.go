@@ -125,7 +125,6 @@ func createPrompt(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}()
 	var send func(url string, data map[string]any) (chatResponse string, err error)
 	var data map[string]any
-	var size int
 	if false && len(m.Attachments) > 0 {
 		var images []string
 		for _, v := range m.Attachments {
@@ -253,7 +252,6 @@ func createPrompt(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println("ChannelMessageSendComplex error:", err)
 		}
 	}
-	fmt.Printf("\n# of char in input: %d\n", size)
 }
 func createCommand(s *discordgo.Session) (err error) {
 	commandList, err := s.ApplicationCommands(s.State.User.ID, "")
