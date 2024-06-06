@@ -28,7 +28,7 @@ Tagging the bot in a message will prompt ollama with that message
     changes the time it takes for the LLM to be loaded out of memory
 ```
 ## Docker
-[![Static Badge](https://img.shields.io/badge/Docker-161B22?style=for-the-badge&logo=docker)](https://hub.docker.com/repository/docker/ethanscully/ollama-discord/)
+[![Static Badge](https://img.shields.io/badge/Docker-161B22?style=for-the-badge&logo=docker)](https://hub.docker.com/r/ethanscully/ollama-discord)
 
 ```Shell
 docker run --name ollama-discord \
